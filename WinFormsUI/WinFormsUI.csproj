@@ -14,7 +14,8 @@
     <AssemblyOriginatorKeyFile>dockpanelsuite.snk</AssemblyOriginatorKeyFile>
     <DelaySign>False</DelaySign>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +25,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,22 +34,28 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Docking\Configuration\PatchSection.cs" />
+    <Compile Include="Docking\CustomFloatWindowFactory.cs" />
     <Compile Include="Docking\DockPanel.SplitterDragHandler.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Docking\DockPanel.DragHandler.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Docking\DockPanelColorPalette.cs" />
     <Compile Include="Docking\DragForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -58,15 +66,15 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Docking\DrawingRoutines.cs" />
-    <Compile Include="Docking\InertButton.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Docking\IImageService.cs" />
     <Compile Include="Docking\InertButtonBase.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Docking\DockPanelSkin.cs">
     </Compile>
-    <Compile Include="Docking\ITheme.cs" />
+    <Compile Include="Docking\IPaintingService.cs" />
+    <Compile Include="Docking\LayoutUtils.cs" />
+    <Compile Include="Docking\PatchController.cs" />
     <Compile Include="Docking\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -75,6 +83,7 @@
     <Compile Include="Docking\ThemeBase.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Docking\VisualStudioColorTable.cs" />
     <Compile Include="Docking\VS2005AutoHideStrip.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -104,9 +113,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Docking\DockPaneCollection.cs" />
-    <Compile Include="Docking\DockPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Docking\DockPanel.cs" />
     <Compile Include="Docking\DockPanelExtender.cs" />
     <Compile Include="Docking\DockPanel.Persistor.cs">
       <SubType>Component</SubType>
@@ -152,6 +159,13 @@
     <Compile Include="Docking\VS2005Theme.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Docking\VisualStudioToolStripRenderer.cs" />
+    <Compile Include="Docking\VisualStudioToolStripExtender.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Docking\VisualStudioToolStripExtender.Designer.cs">
+      <DependentUpon>VisualStudioToolStripExtender.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Docking\Strings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -160,6 +174,58 @@
     </Compile>
     <Compile Include="Docking\Win32\Enums.cs" />
     <Compile Include="Docking\Win32\NativeMethods.cs" />
+    <Compile Include="ThemeVS2012\ImageService.cs" />
+    <Compile Include="ThemeVS2012\PaintingService.cs" />
+    <Compile Include="ThemeVS2012\Resources.Designer.cs" />
+    <Compile Include="ThemeVS2012\Strings.Designer.cs" />
+    <Compile Include="ThemeVS2012\VS2012AutoHideStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012AutoHideStripFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012AutoHideWindowControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012AutoHideWindowFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012BlueTheme.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012DarkTheme.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012DockIndicatorFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012DockOutlineFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012DockPaneCaption.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012DockPaneCaptionFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012DockPaneCaptionInertButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012DockPaneSplitterControlFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012DockPaneStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012DockPaneStripFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012DockWindow.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012DockWindowFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012LightTheme.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012PaletteFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012PaneIndicatorFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012PanelIndicatorFactory.cs" />
+    <Compile Include="ThemeVS2012\VS2012SplitterControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012ThemeBase.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012WindowSplitterControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThemeVS2012\VS2012WindowSplitterControlFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Docking\Resources.resx">
@@ -172,6 +238,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="ThemeVS2012\Resources.resx" />
+    <EmbeddedResource Include="ThemeVS2012\Strings.resx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Docking\DockPanel.Appearance.cs">
@@ -203,15 +271,43 @@
     <None Include="Docking\Resources\DockPane_Option.png" />
     <None Include="Docking\Resources\DockPane_OptionOverflow.png" />
     <None Include="dockpanelsuite.snk" />
-    <None Include="license.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="license.txt" />
+    <None Include="ThemeVS2012\Resources\vs2012blue.vstheme.gz" />
+    <None Include="ThemeVS2012\Resources\vs2012dark.vstheme.gz" />
+    <None Include="ThemeVS2012\Resources\vs2012light.vstheme.gz" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Docking\DockPanel.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Docking\Resources\DockIndicator_PaneDiamond_HotspotIndex_VS2012.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ThemeVS2012\Resources\Dockindicator_PaneDiamond_Hotspot.png" />
+    <Content Include="ThemeVS2012\Resources\DockIndicator_PaneDiamond_HotspotIndex.png" />
+    <Content Include="ThemeVS2012\Resources\MaskArrowBottom.png" />
+    <Content Include="ThemeVS2012\Resources\MaskArrowLeft.png" />
+    <Content Include="ThemeVS2012\Resources\MaskArrowRight.png" />
+    <Content Include="ThemeVS2012\Resources\MaskArrowTop.png" />
+    <Content Include="ThemeVS2012\Resources\MaskCoreBottom.png" />
+    <Content Include="ThemeVS2012\Resources\MaskCoreCenter.png" />
+    <Content Include="ThemeVS2012\Resources\MaskCoreLeft.png" />
+    <Content Include="ThemeVS2012\Resources\MaskCoreRight.png" />
+    <Content Include="ThemeVS2012\Resources\MaskCoreTop.png" />
+    <Content Include="ThemeVS2012\Resources\MaskDock.png" />
+    <Content Include="ThemeVS2012\Resources\MaskDockFive.png" />
+    <Content Include="ThemeVS2012\Resources\MaskTabClose.png" />
+    <Content Include="ThemeVS2012\Resources\MaskTabList.png" />
+    <Content Include="ThemeVS2012\Resources\MaskTabOverflow.png" />
+    <Content Include="ThemeVS2012\Resources\MaskToolWindowAutoHide.png" />
+    <Content Include="ThemeVS2012\Resources\MaskToolWindowClose.png" />
+    <Content Include="ThemeVS2012\Resources\MaskToolWindowDock.png" />
+    <Content Include="ThemeVS2012\Resources\MaskToolWindowOption.png" />
+    <Content Include="ThemeVS2012\Resources\MaskWindowBottom.png" />
+    <Content Include="ThemeVS2012\Resources\MaskWindowCenter.png" />
+    <Content Include="ThemeVS2012\Resources\MaskWindowLeft.png" />
+    <Content Include="ThemeVS2012\Resources\MaskWindowRight.png" />
+    <Content Include="ThemeVS2012\Resources\MaskWindowTop.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask Condition=" '$(Configuration)' == 'Release' AND '$(OS)' == 'Windows_NT' AND Exists('..\gendarme\GendarmeMsBuild.dll')" AssemblyFile="..\gendarme\GendarmeMsBuild.dll" TaskName="GendarmeMsBuild.Gendarme" />

@@ -10,7 +10,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DockSample</RootNamespace>
     <AssemblyName>DockSample</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,9 +46,6 @@
     </Compile>
     <Compile Include="AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CustomFloatWindowFactory.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="DummyDoc.cs">
       <SubType>Form</SubType>
@@ -100,16 +98,6 @@
     <Compile Include="SplashScreen.Designer.cs">
       <DependentUpon>SplashScreen.cs</DependentUpon>
     </Compile>
-    <Compile Include="VS2012ColorTable.cs" />
-    <Compile Include="VSToolStripExtender.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="VSToolStripExtender.Designer.cs">
-      <DependentUpon>VSToolStripExtender.cs</DependentUpon>
-    </Compile>
-    <Compile Include="VS2012ToolStripRenderer.cs" />
-    <Compile Include="VS2013ColorTable.cs" />
-    <Compile Include="VS2013ToolStripRenderer.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>AboutDialog.cs</DependentUpon>
@@ -152,6 +140,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -173,13 +162,17 @@
       <Project>{719f0f69-66da-438d-b5bb-2d883ef4ace2}</Project>
       <Name>ThemeVS2003</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WinFormsUI\ThemeVS2012Light.csproj">
+    <ProjectReference Include="..\WinFormsUI\ThemeVS2012.csproj">
       <Project>{4ed4fdb5-9fd0-49e6-876d-1635f727c755}</Project>
-      <Name>ThemeVS2012Light</Name>
+      <Name>ThemeVS2012</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WinFormsUI\ThemeVS2013Blue.csproj">
+    <ProjectReference Include="..\WinFormsUI\ThemeVS2013.csproj">
       <Project>{245e07f6-10d5-4cfa-b003-0deb06b223da}</Project>
-      <Name>ThemeVS2013Blue</Name>
+      <Name>ThemeVS2013</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WinFormsUI\ThemeVS2015.csproj">
+      <Project>{007d4ac8-948f-4816-86ad-b9d1343672c1}</Project>
+      <Name>ThemeVS2015</Name>
     </ProjectReference>
     <ProjectReference Include="..\WinFormsUI\WinFormsUI.csproj">
       <Project>{C75532C4-765B-418E-B09B-46D36B2ABDB1}</Project>

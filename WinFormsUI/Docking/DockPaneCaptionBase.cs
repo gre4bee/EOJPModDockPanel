@@ -1,8 +1,7 @@
 using System;
-using System.Windows.Forms;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Security.Permissions;
+using System.Windows.Forms;
 
 namespace WeifenLuo.WinFormsUI.Docking
 {
@@ -20,14 +19,14 @@ namespace WeifenLuo.WinFormsUI.Docking
         }
 
         private DockPane m_dockPane;
-        protected DockPane DockPane
+        public DockPane DockPane
         {
-            get	{	return m_dockPane;	}
+            get { return m_dockPane; }
         }
 
         protected DockPane.AppearanceStyle Appearance
         {
-            get	{	return DockPane.Appearance;	}
+            get { return DockPane.Appearance; }
         }
 
         protected bool HasTabPageContextMenu
@@ -54,11 +53,13 @@ namespace WeifenLuo.WinFormsUI.Docking
 
             if (e.Button == MouseButtons.Left &&
                 DockPane.DockPanel.AllowEndUserDocking &&
-				DockPane.DockPanel.AllowChangeLayout &&
+                DockPane.DockPanel.AllowChangeLayout &&
                 DockPane.AllowDockDragAndDrop &&
-                !DockHelper.IsDockStateAutoHide(DockPane.DockState) &&
-                DockPane.ActiveContent != null)
+                DockPane.ActiveContent != null &&
+                (!DockHelper.IsDockStateAutoHide(DockPane.DockState) || CanDragAutoHide))
+            {
                 DockPane.DockPanel.BeginDrag(DockPane);
+            }
         }
 
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]         
@@ -71,9 +72,6 @@ namespace WeifenLuo.WinFormsUI.Docking
                     DockPane.DockPanel.ActiveAutoHideContent = null;
                     return;
                 }
-
-				if ( !DockPane.DockPanel.AllowChangeLayout )
-					return;
 
                 if (DockPane.IsFloat)
                     DockPane.RestoreToPanel();
@@ -100,5 +98,14 @@ namespace WeifenLuo.WinFormsUI.Docking
         }
 
         protected internal abstract int MeasureHeight();
+
+        /// <summary>
+        /// Gets a value indicating whether dock panel can be dragged when in auto hide mode. 
+        /// Default is false.
+        /// </summary>
+        protected virtual bool CanDragAutoHide
+        {
+            get { return false; }
+        }
     }
 }

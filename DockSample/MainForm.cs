@@ -1,12 +1,9 @@
 using System;
 using System.Drawing;
-using System.Collections;
-using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-using System.IO;
-using DockSample.Customization;
-using Lextm.SharpSnmpLib;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace DockSample
@@ -22,9 +19,11 @@ namespace DockSample
         private DummyTaskList m_taskList;
         private bool _showSplash;
         private SplashScreen _splashScreen;
+
         public MainForm()
         {
             InitializeComponent();
+            AutoScaleMode = AutoScaleMode.Dpi;
 
             SetSplashScreen();
             CreateStandardControls();
@@ -33,14 +32,8 @@ namespace DockSample
             RightToLeftLayout = showRightToLeft.Checked;
             m_solutionExplorer.RightToLeftLayout = RightToLeftLayout;
             m_deserializeDockContent = new DeserializeDockContent(GetContentFromPersistString);
-			dockPanel.Extender.FloatWindowFactory = new CustomFloatWindowFactory();
-
-            vS2012ToolStripExtender1.DefaultRenderer = _toolStripProfessionalRenderer;
-            vS2012ToolStripExtender1.VS2012Renderer = _vs2012ToolStripRenderer;
-            vS2012ToolStripExtender1.VS2013Renderer = _vs2013ToolStripRenderer;
-
-            this.topBar.BackColor = this.bottomBar.BackColor = Color.FromArgb(0xFF, 41, 57, 85);
-
+            
+            vsToolStripExtender1.DefaultRenderer = _toolStripProfessionalRenderer;
             SetSchema(this.menuItemSchemaVS2013Blue, null);
         }
 
@@ -71,14 +64,13 @@ namespace DockSample
             DummyDoc dummyDoc = new DummyDoc();
 
             int count = 1;
-            //string text = "C:\\MADFDKAJ\\ADAKFJASD\\ADFKDSAKFJASD\\ASDFKASDFJASDF\\ASDFIJADSFJ\\ASDFKDFDA" + count.ToString();
-            string text = "Document" + count.ToString();
+            string text = $"Document{count}";
             while (FindDocument(text) != null)
             {
                 count++;
-                //text = "C:\\MADFDKAJ\\ADAKFJASD\\ADFKDSAKFJASD\\ASDFKASDFJASDF\\ASDFIJADSFJ\\ASDFKDFDA" + count.ToString();
-                text = "Document" + count.ToString();
+                text = $"Document{count}";
             }
+
             dummyDoc.Text = text;
             return dummyDoc;
         }
@@ -101,6 +93,8 @@ namespace DockSample
             {
                 foreach (IDockContent document in dockPanel.DocumentsToArray())
                 {
+                    // IMPORANT: dispose all panes.
+                    document.DockHandler.DockPanel = null;
                     document.DockHandler.Close();
                 }
             }
@@ -151,11 +145,17 @@ namespace DockSample
 
             // Close all other document windows
             CloseAllDocuments();
+
+            // IMPORTANT: dispose all float windows.
+            foreach (var window in dockPanel.FloatWindows.ToList())
+                window.Dispose();
+
+            System.Diagnostics.Debug.Assert(dockPanel.Panes.Count == 0);
+            System.Diagnostics.Debug.Assert(dockPanel.Contents.Count == 0);
+            System.Diagnostics.Debug.Assert(dockPanel.FloatWindows.Count == 0);
         }
 
         private readonly ToolStripRenderer _toolStripProfessionalRenderer = new ToolStripProfessionalRenderer();
-        private readonly ToolStripRenderer _vs2012ToolStripRenderer = new VS2012ToolStripRenderer();
-        private readonly ToolStripRenderer _vs2013ToolStripRenderer = new Vs2013ToolStripRenderer();
         
         private void SetSchema(object sender, System.EventArgs e)
         {
@@ -168,39 +168,84 @@ namespace DockSample
             if (sender == this.menuItemSchemaVS2005)
             {
                 this.dockPanel.Theme = this.vS2005Theme1;
-                this.EnableVSRenderer(VSToolStripExtender.VsVersion.Vs2005);
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2005, vS2005Theme1);
             }
             else if (sender == this.menuItemSchemaVS2003)
             {
                 this.dockPanel.Theme = this.vS2003Theme1;
-                this.EnableVSRenderer(VSToolStripExtender.VsVersion.Vs2003);
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2003, vS2003Theme1);
             }
             else if (sender == this.menuItemSchemaVS2012Light)
             {
                 this.dockPanel.Theme = this.vS2012LightTheme1;
-                this.EnableVSRenderer(VSToolStripExtender.VsVersion.Vs2012);
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2012, vS2012LightTheme1);
+            }
+            else if (sender == this.menuItemSchemaVS2012Blue)
+            {
+                this.dockPanel.Theme = this.vS2012BlueTheme1;
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2012, vS2012BlueTheme1);
+            }
+            else if (sender == this.menuItemSchemaVS2012Dark)
+            {
+                this.dockPanel.Theme = this.vS2012DarkTheme1;
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2012, vS2012DarkTheme1);
             }
             else if (sender == this.menuItemSchemaVS2013Blue)
             {
                 this.dockPanel.Theme = this.vS2013BlueTheme1;
-                this.EnableVSRenderer(VSToolStripExtender.VsVersion.Vs2013);
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2013, vS2013BlueTheme1);
+            }
+            else if (sender == this.menuItemSchemaVS2013Light)
+            {
+                this.dockPanel.Theme = this.vS2013LightTheme1;
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2013, vS2013LightTheme1);
+            }
+            else if (sender == this.menuItemSchemaVS2013Dark)
+            {
+                this.dockPanel.Theme = this.vS2013DarkTheme1;
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2013, vS2013DarkTheme1);
+            }
+            else if (sender == this.menuItemSchemaVS2015Blue)
+            {
+                this.dockPanel.Theme = this.vS2015BlueTheme1;
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2015, vS2015BlueTheme1);
+            }
+            else if (sender == this.menuItemSchemaVS2015Light)
+            {
+                this.dockPanel.Theme = this.vS2015LightTheme1;
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2015, vS2015LightTheme1);
+            }
+            else if (sender == this.menuItemSchemaVS2015Dark)
+            {
+                this.dockPanel.Theme = this.vS2015DarkTheme1;
+                this.EnableVSRenderer(VisualStudioToolStripExtender.VsVersion.Vs2015, vS2015DarkTheme1);
             }
 
             menuItemSchemaVS2005.Checked = (sender == menuItemSchemaVS2005);
             menuItemSchemaVS2003.Checked = (sender == menuItemSchemaVS2003);
             menuItemSchemaVS2012Light.Checked = (sender == menuItemSchemaVS2012Light);
-            this.menuItemSchemaVS2013Blue.Checked = (sender == this.menuItemSchemaVS2013Blue);
-            this.topBar.Visible = this.bottomBar.Visible = (sender == this.menuItemSchemaVS2013Blue);
+            menuItemSchemaVS2012Blue.Checked = (sender == menuItemSchemaVS2012Blue);
+            menuItemSchemaVS2012Dark.Checked = (sender == menuItemSchemaVS2012Dark);
+            menuItemSchemaVS2013Light.Checked = (sender == menuItemSchemaVS2013Light);
+            menuItemSchemaVS2013Blue.Checked = (sender == menuItemSchemaVS2013Blue);
+            menuItemSchemaVS2013Dark.Checked = (sender == menuItemSchemaVS2013Dark);
+            menuItemSchemaVS2015Light.Checked = (sender == menuItemSchemaVS2015Light);
+            menuItemSchemaVS2015Blue.Checked = (sender == menuItemSchemaVS2015Blue);
+            menuItemSchemaVS2015Dark.Checked = (sender == menuItemSchemaVS2015Dark);
+            if (dockPanel.Theme.ColorPalette != null)
+            {
+                statusBar.BackColor = dockPanel.Theme.ColorPalette.MainWindowStatusBarDefault.Background;
+            }
 
             if (File.Exists(configFile))
                 dockPanel.LoadFromXml(configFile, m_deserializeDockContent);
         }
 
-        private void EnableVSRenderer(VSToolStripExtender.VsVersion version)
+        private void EnableVSRenderer(VisualStudioToolStripExtender.VsVersion version, ThemeBase theme)
         {
-            vS2012ToolStripExtender1.SetStyle(this.mainMenu, version);
-            vS2012ToolStripExtender1.SetStyle(this.toolBar, version);
-            vS2012ToolStripExtender1.SetStyle(this.statusBar, version);
+            vsToolStripExtender1.SetStyle(mainMenu, version, theme);
+            vsToolStripExtender1.SetStyle(toolBar, version, theme);
+            vsToolStripExtender1.SetStyle(statusBar, version, theme);
         }
 
         private void SetDocumentStyle(object sender, System.EventArgs e)
@@ -231,61 +276,6 @@ namespace DockSample
             menuItemLayoutByXml.Enabled = (newStyle != DocumentStyle.SystemMdi);
             toolBarButtonLayoutByCode.Enabled = (newStyle != DocumentStyle.SystemMdi);
             toolBarButtonLayoutByXml.Enabled = (newStyle != DocumentStyle.SystemMdi);
-        }
-
-        private AutoHideStripSkin _autoHideStripSkin;
-        private DockPaneStripSkin _dockPaneStripSkin;
-
-        private void SetDockPanelSkinOptions(bool isChecked)
-        {
-            if (isChecked)
-            {
-                // All of these options may be set in the designer.
-                // This is not a complete list of possible options available in the skin.
-
-                AutoHideStripSkin autoHideSkin = new AutoHideStripSkin();
-                autoHideSkin.DockStripGradient.StartColor = Color.AliceBlue;
-                autoHideSkin.DockStripGradient.EndColor = Color.Blue;
-                autoHideSkin.DockStripGradient.LinearGradientMode = System.Drawing.Drawing2D.LinearGradientMode.ForwardDiagonal;
-                autoHideSkin.TabGradient.StartColor = SystemColors.Control;
-                autoHideSkin.TabGradient.EndColor = SystemColors.ControlDark;
-                autoHideSkin.TabGradient.TextColor = SystemColors.ControlText;
-                autoHideSkin.TextFont = new Font("Showcard Gothic", 10);
-
-                _autoHideStripSkin = dockPanel.Skin.AutoHideStripSkin;
-                dockPanel.Skin.AutoHideStripSkin = autoHideSkin;
-
-                DockPaneStripSkin dockPaneSkin = new DockPaneStripSkin();
-                dockPaneSkin.DocumentGradient.DockStripGradient.StartColor = Color.Red;
-                dockPaneSkin.DocumentGradient.DockStripGradient.EndColor = Color.Pink;
-
-                dockPaneSkin.DocumentGradient.ActiveTabGradient.StartColor = Color.Green;
-                dockPaneSkin.DocumentGradient.ActiveTabGradient.EndColor = Color.Green;
-                dockPaneSkin.DocumentGradient.ActiveTabGradient.TextColor = Color.White;
-
-                dockPaneSkin.DocumentGradient.InactiveTabGradient.StartColor = Color.Gray;
-                dockPaneSkin.DocumentGradient.InactiveTabGradient.EndColor = Color.Gray;
-                dockPaneSkin.DocumentGradient.InactiveTabGradient.TextColor = Color.Black;
-
-                dockPaneSkin.TextFont = new Font("SketchFlow Print", 10);
-
-                _dockPaneStripSkin = dockPanel.Skin.DockPaneStripSkin;
-                dockPanel.Skin.DockPaneStripSkin = dockPaneSkin;
-            }
-            else
-            {
-                if (_autoHideStripSkin != null)
-                {
-                    dockPanel.Skin.AutoHideStripSkin = _autoHideStripSkin;
-                }
-
-                if (_dockPaneStripSkin != null)
-                {
-                    dockPanel.Skin.DockPaneStripSkin = _dockPaneStripSkin;
-                }
-            }
-
-            menuItemLayoutByXml_Click(menuItemLayoutByXml, EventArgs.Empty);
         }
 
         #endregion
@@ -458,8 +448,6 @@ namespace DockSample
                 menuItemLayoutByCode_Click(null, null);
             else if (e.ClickedItem == toolBarButtonLayoutByXml)
                 menuItemLayoutByXml_Click(null, null);
-            else if (e.ClickedItem == toolBarButtonDockPanelSkinDemo)
-                SetDockPanelSkinOptions(!toolBarButtonDockPanelSkinDemo.Checked);
         }
 
         private void menuItemNewWindow_Click(object sender, System.EventArgs e)
@@ -622,17 +610,5 @@ namespace DockSample
         {
             ResizeSplash();
         }
-
-
-		private void menuItemAllowChangeLayout_Click( object sender, EventArgs e ) {
-
-			menuItemAllowChangeLayout.Checked = dockPanel.AllowChangeLayout = !dockPanel.AllowChangeLayout;
-			FormBorderStyle = dockPanel.AllowChangeLayout ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
-		}
-
-		private void canCloseFloatWindowInLockToolStripMenuItem_Click( object sender, EventArgs e ) {
-
-			canCloseFloatWindowInLockToolStripMenuItem.Checked = dockPanel.CanCloseFloatWindowInLock = !dockPanel.CanCloseFloatWindowInLock;
-		}
     }
 }

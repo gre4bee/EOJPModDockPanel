@@ -61,7 +61,7 @@ namespace WeifenLuo.WinFormsUI.Docking
             private static Bitmap _bitmapPaneDiamondFill = Resources.DockIndicator_PaneDiamond_Fill;
             private static Bitmap _bitmapPaneDiamondHotSpot = Resources.DockIndicator_PaneDiamond_HotSpot;
             private static Bitmap _bitmapPaneDiamondHotSpotIndex = Resources.DockIndicator_PaneDiamond_HotSpotIndex;
-            private static HotSpotIndex[] _hotSpots = new[]
+            private static HotSpotIndex[] _hotSpots =
             {
                 new HotSpotIndex(1, 0, DockStyle.Top),
                 new HotSpotIndex(0, 1, DockStyle.Left),
@@ -249,9 +249,10 @@ namespace WeifenLuo.WinFormsUI.Docking
             public DefaultDockOutline()
             {
                 m_dragForm = new DragForm();
-				DragForm.Bounds = Rectangle.Empty;
+                SetDragForm(Rectangle.Empty);
                 DragForm.BackColor = SystemColors.ActiveCaption;
                 DragForm.Opacity = 0.5;
+                DragForm.Show(false);
             }
 
             DragForm m_dragForm;
@@ -265,14 +266,10 @@ namespace WeifenLuo.WinFormsUI.Docking
                 CalculateRegion();
             }
 
-            protected override void OnHide()
+            protected override void OnClose()
             {
-                DragForm.Visible = false;
+                DragForm.Close();
             }
-
-			protected override void OnClose() {
-				DragForm.Close();
-			}
 
             private void CalculateRegion()
             {
@@ -373,7 +370,6 @@ namespace WeifenLuo.WinFormsUI.Docking
 
             private void SetDragForm(Rectangle rect)
             {
-				DragForm.Show( false );
                 DragForm.Bounds = rect;
                 if (rect == Rectangle.Empty)
                 {
@@ -393,14 +389,14 @@ namespace WeifenLuo.WinFormsUI.Docking
 
             private void SetDragForm(Rectangle rect, Region region)
             {
-				DragForm.Show( false );
                 DragForm.Bounds = rect;
                 DragForm.Region = region;
             }
         }
 
-        private sealed class DockDragHandler : DragHandler
+        public sealed class DockDragHandler : DragHandler
         {
+            // TODO: make it customizable so we can set Opacity = 0.7.
             public class DockIndicator : DragForm
             {
                 #region consts
@@ -429,7 +425,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                     get
                     {
                         if (m_paneDiamond == null)
-                            m_paneDiamond = m_dragHandler.DockPanel.Extender.PaneIndicatorFactory.CreatePaneIndicator();
+                            m_paneDiamond = m_dragHandler.DockPanel.Theme.Extender.PaneIndicatorFactory.CreatePaneIndicator(m_dragHandler.DockPanel.Theme);
 
                         return m_paneDiamond;
                     }
@@ -441,7 +437,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                     get
                     {
                         if (m_panelLeft == null)
-                            m_panelLeft = m_dragHandler.DockPanel.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Left);
+                            m_panelLeft = m_dragHandler.DockPanel.Theme.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Left, m_dragHandler.DockPanel.Theme);
 
                         return m_panelLeft;
                     }
@@ -453,7 +449,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                     get
                     {
                         if (m_panelRight == null)
-                            m_panelRight = m_dragHandler.DockPanel.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Right);
+                            m_panelRight = m_dragHandler.DockPanel.Theme.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Right, m_dragHandler.DockPanel.Theme);
 
                         return m_panelRight;
                     }
@@ -465,7 +461,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                     get
                     {
                         if (m_panelTop == null)
-                            m_panelTop = m_dragHandler.DockPanel.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Top);
+                            m_panelTop = m_dragHandler.DockPanel.Theme.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Top, m_dragHandler.DockPanel.Theme);
 
                         return m_panelTop;
                     }
@@ -477,7 +473,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                     get
                     {
                         if (m_panelBottom == null)
-                            m_panelBottom = m_dragHandler.DockPanel.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Bottom);
+                            m_panelBottom = m_dragHandler.DockPanel.Theme.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Bottom, m_dragHandler.DockPanel.Theme);
 
                         return m_panelBottom;
                     }
@@ -489,7 +485,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                     get
                     {
                         if (m_panelFill == null)
-                            m_panelFill = m_dragHandler.DockPanel.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Fill);
+                            m_panelFill = m_dragHandler.DockPanel.Theme.Extender.PanelIndicatorFactory.CreatePanelIndicator(DockStyle.Fill, m_dragHandler.DockPanel.Theme);
 
                         return m_panelFill;
                     }
@@ -611,11 +607,11 @@ namespace WeifenLuo.WinFormsUI.Docking
                     if (ShouldPaneDiamondVisible())
                     {
                         Rectangle rect = RectangleToClient(DockPane.RectangleToScreen(DockPane.ClientRectangle));
-                        PaneDiamond.Location = new Point(rect.Left + (rect.Width - PaneDiamond.Width)/2, rect.Top + (rect.Height - PaneDiamond.Height)/2);
+                        PaneDiamond.Location = new Point(rect.Left + (rect.Width - PaneDiamond.Width) / 2, rect.Top + (rect.Height - PaneDiamond.Height) / 2);
                         PaneDiamond.Visible = true;
                         using (GraphicsPath graphicsPath = PaneDiamond.DisplayingGraphicsPath.Clone() as GraphicsPath)
                         {
-                            Point[] pts = new Point[]
+                            Point[] pts =
                                 {
                                     new Point(PaneDiamond.Left, PaneDiamond.Top),
                                     new Point(PaneDiamond.Right, PaneDiamond.Top),
@@ -628,9 +624,6 @@ namespace WeifenLuo.WinFormsUI.Docking
 
                             region.Union(graphicsPath);
                         }
-						if ( !Visible) {
-							Show( false );
-						}
                     }
                     else
                         PaneDiamond.Visible = false;
@@ -667,10 +660,10 @@ namespace WeifenLuo.WinFormsUI.Docking
                     RefreshChanges();
                 }
 
-                public void TestDrop(DockHelper.CursorPoint  info)
+                public void TestDrop()
                 {
-					Point pt = info.Cursor;
-					DockPane = info.Pane;
+                    Point pt = Control.MousePosition;
+                    DockPane = DockHelper.PaneAtPoint(pt, DockPanel);
 
                     if (TestDrop(PanelLeft, pt) != DockStyle.None)
                         HitTestResult = PanelLeft;
@@ -744,8 +737,9 @@ namespace WeifenLuo.WinFormsUI.Docking
                     return;
                 }
 
-                Outline = DockPanel.Extender.DockOutlineFactory.CreateDockOutline();
-                Indicator = new DockIndicator(this);
+                Outline = DockPanel.Theme.Extender.DockOutlineFactory.CreateDockOutline();
+                Indicator = DockPanel.Theme.Extender.DockIndicatorFactory.CreateDockIndicator(this);
+                Indicator.Show(false);
 
                 FloatOutlineBounds = DragSource.BeginDrag(StartMousePosition);
             }
@@ -753,7 +747,6 @@ namespace WeifenLuo.WinFormsUI.Docking
             protected override void OnDragging()
             {
                 TestDrop();
-				DragSource.OnDragging( Control.MousePosition );
             }
 
             protected override void OnEndDrag(bool abort)
@@ -773,6 +766,9 @@ namespace WeifenLuo.WinFormsUI.Docking
                 DragSource.EndDrag();
 
                 DragSource = null;
+
+                // Fire notification
+                DockPanel.OnDocumentDragged();
             }
 
             private void TestDrop()
@@ -781,45 +777,41 @@ namespace WeifenLuo.WinFormsUI.Docking
 
                 Indicator.FullPanelEdge = ((Control.ModifierKeys & Keys.Shift) != 0);
 
-				DockHelper.CursorPoint cursorPointInfo = DockHelper.CursorPointInformation( DockPanel, DragSource );
+                if ((Control.ModifierKeys & Keys.Control) == 0)
+                {
+                    Indicator.TestDrop();
 
-				if ( ( Control.ModifierKeys & Keys.Control ) == 0 ) {
-					if ( Indicator.Visible == false ) {
-						// show indicator when the cursor comes into the dock panel area
-						if ( cursorPointInfo.DockPanel != null ) {
-							Indicator.Show( false );
-						}
-					}
+                    if (!Outline.FlagTestDrop)
+                    {
+                        DockPane pane = DockHelper.PaneAtPoint(Control.MousePosition, DockPanel);
+                        if (pane != null && DragSource.IsDockStateValid(pane.DockState))
+                            pane.TestDrop(DragSource, Outline);
+                    }
 
-					Indicator.TestDrop( cursorPointInfo );
+                    if (!Outline.FlagTestDrop && DragSource.IsDockStateValid(DockState.Float))
+                    {
+                        FloatWindow floatWindow = DockHelper.FloatWindowAtPoint(Control.MousePosition, DockPanel);
+                        if (floatWindow != null)
+                            floatWindow.TestDrop(DragSource, Outline);
+                    }
+                }
+                else
+                    Indicator.DockPane = DockHelper.PaneAtPoint(Control.MousePosition, DockPanel);
 
-					if ( !Outline.FlagTestDrop ) {
-						if ( cursorPointInfo.Pane != null && DragSource.IsDockStateValid( cursorPointInfo.Pane.DockState ) )
-							cursorPointInfo.Pane.TestDrop( cursorPointInfo, Outline );
-					}
-
-					if ( !Outline.FlagTestDrop && DragSource.IsDockStateValid( DockState.Float ) ) {
-						if ( cursorPointInfo.FloatWindow != null )
-							cursorPointInfo.FloatWindow.TestDrop( cursorPointInfo, Outline );
-					}
-				} else
-					Indicator.DockPane = cursorPointInfo.Pane;
-
-                if (!Outline.FlagTestDrop) {
-					Rectangle rect = FloatOutlineBounds;
-					rect.Offset( Control.MousePosition.X - StartMousePosition.X, Control.MousePosition.Y - StartMousePosition.Y );
-
-					// do not show the outline when a user is moving a floating window
-					if ( !(DragSource is FloatWindow) && DragSource.IsDockStateValid( DockState.Float ) ) {
-						Outline.Show( rect, true );
-					} else {
-						Cursor.Current = Cursors.No;
-						Outline.Show( rect, false );
-					}
+                if (!Outline.FlagTestDrop)
+                {
+                    if (DragSource.IsDockStateValid(DockState.Float))
+                    {
+                        Rectangle rect = FloatOutlineBounds;
+                        rect.Offset(Control.MousePosition.X - StartMousePosition.X, Control.MousePosition.Y - StartMousePosition.Y);
+                        Outline.Show(rect);
+                    }
                 }
 
                 if (!Outline.FlagTestDrop)
                 {
+                    Cursor.Current = Cursors.No;
+                    Outline.Show();
                 }
                 else
                     Cursor.Current = DragControl.Cursor;

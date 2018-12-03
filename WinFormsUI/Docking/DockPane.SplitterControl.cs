@@ -67,9 +67,8 @@ namespace WeifenLuo.WinFormsUI.Docking
 
                 if (e.Button != MouseButtons.Left)
                     return;
-
-				if ( !m_pane.DockPanel.AllowChangeLayout )
-					return;
+                if (!m_pane.DockPanel.AllowChangeLayout)
+                    return;
 
                 DockPane.DockPanel.BeginDrag(this, Parent.RectangleToScreen(Bounds));
             }

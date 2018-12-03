@@ -30,7 +30,7 @@ namespace WeifenLuo.WinFormsUI.Docking
 
             m_nestedPanes = new NestedPaneCollection(this);
 
-			AllowChangeLayout = dockPanel.AllowChangeLayout;
+            AllowChangeLayout = dockPanel.AllowChangeLayout;
             ShowInTaskbar = false;
             if (dockPanel.RightToLeft != RightToLeft)
                 RightToLeft = dockPanel.RightToLeft;
@@ -55,6 +55,11 @@ namespace WeifenLuo.WinFormsUI.Docking
             if (pane != null)
                 pane.FloatWindow = this;
 
+            if (PatchController.EnableFontInheritanceFix == true)
+            {
+                Font = dockPanel.Font;
+            }
+
             ResumeLayout();
         }
 
@@ -75,25 +80,24 @@ namespace WeifenLuo.WinFormsUI.Docking
             get	{	return m_allowEndUserDocking;	}
             set	{	m_allowEndUserDocking = value;	}
         }
-
+        private bool m_allowChangeLayout = true;
+        public bool AllowChangeLayout
+        {
+            get { return m_allowChangeLayout; }
+            set
+            {
+                if (m_allowChangeLayout == value)
+                    return;
+                m_allowChangeLayout = value;
+                FormBorderStyle = m_allowChangeLayout ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+            }
+        }
         private bool m_doubleClickTitleBarToDock = true;
         public bool DoubleClickTitleBarToDock
         {
             get { return m_doubleClickTitleBarToDock; }
             set { m_doubleClickTitleBarToDock = value; }
         }
-
-		private bool m_allowChangeLayout = true;
-		public bool AllowChangeLayout {
-			get { return m_allowChangeLayout; }
-			set {
-				if ( m_allowChangeLayout == value )
-					return;
-
-				m_allowChangeLayout = value;
-				FormBorderStyle = m_allowChangeLayout ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
-			}
-		}
 
         public NestedPaneCollection NestedPanes
         {
@@ -164,27 +168,25 @@ namespace WeifenLuo.WinFormsUI.Docking
         [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters", MessageId = "System.Windows.Forms.Control.set_Text(System.String)")]
         internal void SetText()
         {
-			DockPane activePane = null;
-
-			foreach ( var pane in VisibleNestedPanes ) {
-				if ( pane.IsActivated ) {
-					activePane = pane;
+            DockPane activePane = (VisibleNestedPanes.Count == 1) ? VisibleNestedPanes[0] : null;
+            foreach (var pane in VisibleNestedPanes)
+            {
+                if (pane.IsActivated)
+                {
+                    activePane = pane;
 					break;
 				}
-			}
-
-			if ( activePane == null )
-				activePane = VisibleNestedPanes.Count > 0 ? VisibleNestedPanes[0] : null;
-
-			if ( activePane == null || activePane.ActiveContent == null )
+            }
+            if (activePane == null || activePane.ActiveContent == null)
             {
                 Text = " ";	// use " " instead of string.Empty because the whole title bar will disappear when ControlBox is set to false.
                 Icon = null;
+
             }
             else
             {
-				Text = activePane.ActiveContent.DockHandler.TabText;
-				Icon = activePane.ActiveContent.DockHandler.Icon;
+                Text = activePane.ActiveContent.DockHandler.TabText;
+                Icon = activePane.ActiveContent.DockHandler.Icon;
             }
         }
 
@@ -212,7 +214,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                             return;
 
                         uint result = Win32Helper.IsRunningOnMono ? 0 : NativeMethods.SendMessage(this.Handle, (int)Win32.Msgs.WM_NCHITTEST, 0, (uint)m.LParam);
-                        if (result == 2 && DockPanel.AllowEndUserDocking && DockPanel.AllowChangeLayout && this.AllowEndUserDocking)	// HITTEST_CAPTION
+                        if (result == 2 && DockPanel.AllowEndUserDocking && this.AllowEndUserDocking)	// HITTEST_CAPTION
                         {
                             Activate();
                             m_dockPanel.BeginDrag(this);
@@ -224,7 +226,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                     }
                 case (int)Win32.Msgs.WM_NCRBUTTONDOWN:
                     {
-                        uint result = Win32Helper.IsRunningOnMono ? 0 : NativeMethods.SendMessage(this.Handle, (int)Win32.Msgs.WM_NCHITTEST, 0, (uint)m.LParam);
+                        uint result = Win32Helper.IsRunningOnMono ? Win32Helper.HitTestCaption(this) : NativeMethods.SendMessage(this.Handle, (int)Win32.Msgs.WM_NCHITTEST, 0, (uint)m.LParam);
                         if (result == 2)	// HITTEST_CAPTION
                         {
                             DockPane theOnlyPane = (VisibleNestedPanes.Count == 1) ? VisibleNestedPanes[0] : null;
@@ -239,9 +241,9 @@ namespace WeifenLuo.WinFormsUI.Docking
                         return;
                     }
                 case (int)Win32.Msgs.WM_CLOSE:
-					if ( !m_dockPanel.AllowChangeLayout && !m_dockPanel.CanCloseFloatWindowInLock )
-						return;
 
+                    if (!m_dockPanel.AllowChangeLayout && !m_dockPanel.CanCloseFloatWindowInLock)
+                        return;
                     if (NestedPanes.Count == 0)
                     {
                         base.WndProc(ref m);
@@ -268,8 +270,8 @@ namespace WeifenLuo.WinFormsUI.Docking
                     return;
                 case (int)Win32.Msgs.WM_NCLBUTTONDBLCLK:
                     {
-                        uint result = !DoubleClickTitleBarToDock || !DockPanel.AllowChangeLayout || Win32Helper.IsRunningOnMono 
-                            ? 0
+                        uint result = !DoubleClickTitleBarToDock || Win32Helper.IsRunningOnMono 
+                            ? Win32Helper.HitTestCaption(this)
                             : NativeMethods.SendMessage(this.Handle, (int)Win32.Msgs.WM_NCHITTEST, 0, (uint)m.LParam);
 
                         if (result != 2)	// HITTEST_CAPTION
@@ -339,15 +341,15 @@ namespace WeifenLuo.WinFormsUI.Docking
             get	{	return ClientRectangle;	}
         }
 
-		internal void TestDrop( DockHelper.CursorPoint info, DockOutlineBase dockOutline )
+        internal void TestDrop(IDockDragSource dragSource, DockOutlineBase dockOutline)
         {
             if (VisibleNestedPanes.Count == 1)
             {
                 DockPane pane = VisibleNestedPanes[0];
-				if ( !info.DragSource.CanDockTo( pane ) )
+                if (!dragSource.CanDockTo(pane))
                     return;
 
-				Point ptMouse = info.Cursor;
+                Point ptMouse = Control.MousePosition;
                 uint lParam = Win32Helper.MakeLong(ptMouse.X, ptMouse.Y);
                 if (!Win32Helper.IsRunningOnMono)
                 {
@@ -387,25 +389,15 @@ namespace WeifenLuo.WinFormsUI.Docking
         }
 
         private int m_preDragExStyle;
-		private Point m_preDragPosition;
-		private Point m_dragStartPoint;
 
         Rectangle IDockDragSource.BeginDrag(Point ptMouse)
         {
-			m_preDragPosition = Location;
-			m_dragStartPoint = ptMouse;
             m_preDragExStyle = NativeMethods.GetWindowLong(this.Handle, (int)Win32.GetWindowLongIndex.GWL_EXSTYLE);
             NativeMethods.SetWindowLong(this.Handle, 
                                         (int)Win32.GetWindowLongIndex.GWL_EXSTYLE,
                                         m_preDragExStyle | (int)(Win32.WindowExStyles.WS_EX_TRANSPARENT | Win32.WindowExStyles.WS_EX_LAYERED) );
             return Bounds;
         }
-
-		void IDockDragSource.OnDragging( Point ptMouse ) {
-			Location = new Point(
-				m_preDragPosition.X + ( ptMouse.X - m_dragStartPoint.X ),
-				m_preDragPosition.Y + ( ptMouse.Y - m_dragStartPoint.Y ) );
-		}
 
         void IDockDragSource.EndDrag()
         {

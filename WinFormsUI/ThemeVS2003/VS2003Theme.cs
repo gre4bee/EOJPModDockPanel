@@ -1,5 +1,3 @@
-using System;
-
 namespace WeifenLuo.WinFormsUI.Docking
 {
     using System.Drawing;
@@ -10,29 +8,13 @@ namespace WeifenLuo.WinFormsUI.Docking
     /// </summary>
     public class VS2003Theme : ThemeBase
     {
-        /// <summary>
-        /// Applies the specified theme to the dock panel.
-        /// </summary>
-        /// <param name="dockPanel">The dock panel.</param>
-        public override void Apply(DockPanel dockPanel)
+        public VS2003Theme()
         {
-            if (dockPanel == null)
-            {
-                throw new NullReferenceException("dockPanel");
-            }
-
+            Skin = CreateVisualStudio2003();
             Measures.SplitterSize = 4;
-            dockPanel.Extender.DockPaneCaptionFactory = new VS2003DockPaneCaptionFactory();
-            dockPanel.Extender.AutoHideStripFactory = new VS2003AutoHideStripFactory();
-            dockPanel.Extender.AutoHideWindowFactory = null;
-            dockPanel.Extender.DockPaneStripFactory = new VS2003DockPaneStripFactory();
-            dockPanel.Extender.DockPaneSplitterControlFactory = null;
-            dockPanel.Extender.DockWindowSplitterControlFactory = null;
-            dockPanel.Extender.DockWindowFactory = null;
-            dockPanel.Extender.PaneIndicatorFactory = null;
-            dockPanel.Extender.PanelIndicatorFactory = null;
-            dockPanel.Extender.DockOutlineFactory = null;
-            dockPanel.Skin = CreateVisualStudio2003();
+            Extender.AutoHideStripFactory = new VS2003AutoHideStripFactory();
+            Extender.DockPaneCaptionFactory = new VS2003DockPaneCaptionFactory();
+            Extender.DockPaneStripFactory = new VS2003DockPaneStripFactory();
         }
 
         internal static DockPanelSkin CreateVisualStudio2003()
