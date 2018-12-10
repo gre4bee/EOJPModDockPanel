@@ -98,7 +98,7 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
         private const int _DocumentStripGapTop = 0;
         private const int _DocumentStripGapBottom = 1;
         private const int _DocumentTabMaxWidth = 65;
-        private const int _DocumentButtonGapTop = 3;
+        private const int _DocumentButtonGapTop = 1;
         private const int _DocumentButtonGapBottom = 3;
         private const int _DocumentButtonGapBetween = 0;
         private const int _DocumentButtonGapRight = 3;
@@ -106,7 +106,7 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
         private const int _DocumentTabGapLeft = 0;//3;
         private const int _DocumentTabGapRight = 0;//3;
         private const int _DocumentIconGapBottom = 2;//2;
-        private const int _DocumentIconGapLeft = 8;
+        private const int _DocumentIconGapLeft = 2;
         private const int _DocumentIconGapRight = 0;
         private const int _DocumentIconHeight = 16;
         private const int _DocumentIconWidth = 16;
@@ -1165,21 +1165,27 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
                 {
                     paint = activeColor;
                     text = activeText;
-                    image = IsMouseDown
-                        ? imageService.TabPressActive_Close
-                        : rectCloseButton == ActiveClose
-                            ? imageService.TabHoverActive_Close
-                            : imageService.TabActive_Close;
+                    if (m_closeButtonVisible)        //update
+                    {
+                        image = IsMouseDown
+                            ? imageService.TabPressActive_Close
+                            : rectCloseButton == ActiveClose
+                                ? imageService.TabHoverActive_Close
+                                : imageService.TabActive_Close;
+                    }
                 }
                 else
                 {
                     paint = lostFocusColor;
                     text = lostFocusText;
-                    image = IsMouseDown
-                        ? imageService.TabPressLostFocus_Close
-                        : rectCloseButton == ActiveClose
-                            ? imageService.TabHoverLostFocus_Close
-                            : imageService.TabLostFocus_Close;
+                    if (m_closeButtonVisible)        //update
+                    {
+                        image = IsMouseDown
+                            ? imageService.TabPressActive_Close
+                            : rectCloseButton == ActiveClose
+                                ? imageService.TabHoverActive_Close
+                                : imageService.TabActive_Close;
+                    }
                 }
             }
             else
@@ -1188,11 +1194,14 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
                 {
                     paint = mouseHoverColor;
                     text = mouseHoverText;
-                    image = IsMouseDown
-                        ? imageService.TabPressInactive_Close
-                        : rectCloseButton == ActiveClose
-                            ? imageService.TabHoverInactive_Close
-                            : imageService.TabInactive_Close;
+                    if (m_closeButtonVisible)        //update
+                    {
+                        image = IsMouseDown
+                            ? imageService.TabPressActive_Close
+                            : rectCloseButton == ActiveClose
+                                ? imageService.TabHoverActive_Close
+                                : imageService.TabActive_Close;
+                    }
                 }
                 else
                 {
@@ -1205,7 +1214,11 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
             TextRenderer.DrawText(g, tab.Content.DockHandler.TabText, TextFont, rectText, text, DocumentTextFormat);
             if (image != null)
                 g.DrawImage(image, rectCloseButton);
-
+            // Not show close button space if it not visible
+            if (!m_closeButtonVisible)
+            {
+                rect.Width = rect.Width - rectCloseButton.Width;
+            }
             if (rectTab.Contains(rectIcon) && DockPane.DockPanel.ShowDocumentIcon)
                 g.DrawIcon(tab.Content.DockHandler.Icon, rectIcon);
         }
@@ -1307,7 +1320,7 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
 
         private Rectangle GetCloseButtonRect(Rectangle rectTab)
         {
-            if (Appearance != DockPane.AppearanceStyle.Document)
+            if (Appearance != DockPane.AppearanceStyle.Document || (!this.m_closeButtonVisible) )
             {
                 return Rectangle.Empty;
             }
@@ -1378,7 +1391,7 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
             {
                 ButtonOverflow.Visible = m_documentTabsOverflow;
                 ButtonOverflow.RefreshChanges();
-
+                m_closeButtonVisible = false;
                 ButtonWindowList.Visible = !m_documentTabsOverflow;
                 ButtonWindowList.RefreshChanges();
             }

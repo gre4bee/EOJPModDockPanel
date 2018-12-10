@@ -47,9 +47,6 @@
     <Compile Include="AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="CustomFloatWindowFactory.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="DummyDoc.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -99,18 +99,6 @@ namespace WeifenLuo.WinFormsUI.Docking
             set { m_doubleClickTitleBarToDock = value; }
         }
 
-		private bool m_allowChangeLayout = true;
-		public bool AllowChangeLayout {
-			get { return m_allowChangeLayout; }
-			set {
-				if ( m_allowChangeLayout == value )
-					return;
-
-				m_allowChangeLayout = value;
-				FormBorderStyle = m_allowChangeLayout ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
-			}
-		}
-
         public NestedPaneCollection NestedPanes
         {
             get	{	return m_nestedPanes;	}
