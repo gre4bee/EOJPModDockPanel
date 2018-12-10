@@ -32,8 +32,19 @@ namespace DockSample
             RightToLeftLayout = showRightToLeft.Checked;
             m_solutionExplorer.RightToLeftLayout = RightToLeftLayout;
             m_deserializeDockContent = new DeserializeDockContent(GetContentFromPersistString);
+<<<<<<< HEAD
             
             vsToolStripExtender1.DefaultRenderer = _toolStripProfessionalRenderer;
+=======
+			dockPanel.Extender.FloatWindowFactory = new CustomFloatWindowFactory();
+
+            vS2012ToolStripExtender1.DefaultRenderer = _toolStripProfessionalRenderer;
+            vS2012ToolStripExtender1.VS2012Renderer = _vs2012ToolStripRenderer;
+            vS2012ToolStripExtender1.VS2013Renderer = _vs2013ToolStripRenderer;
+
+            this.topBar.BackColor = this.bottomBar.BackColor = Color.FromArgb(0xFF, 41, 57, 85);
+
+>>>>>>> d0768eb... ウィンドウロックの実装.
             SetSchema(this.menuItemSchemaVS2013Blue, null);
         }
 
@@ -610,5 +621,12 @@ namespace DockSample
         {
             ResizeSplash();
         }
+
+
+		private void menuItemAllowChangeLayout_Click( object sender, EventArgs e ) {
+
+			menuItemAllowChangeLayout.Checked = dockPanel.AllowChangeLayout = !dockPanel.AllowChangeLayout;
+			FormBorderStyle = dockPanel.AllowChangeLayout ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+		}
     }
 }

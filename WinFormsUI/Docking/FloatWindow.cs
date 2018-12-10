@@ -99,6 +99,18 @@ namespace WeifenLuo.WinFormsUI.Docking
             set { m_doubleClickTitleBarToDock = value; }
         }
 
+		private bool m_allowChangeLayout = true;
+		public bool AllowChangeLayout {
+			get { return m_allowChangeLayout; }
+			set {
+				if ( m_allowChangeLayout == value )
+					return;
+
+				m_allowChangeLayout = value;
+				FormBorderStyle = m_allowChangeLayout ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+			}
+		}
+
         public NestedPaneCollection NestedPanes
         {
             get	{	return m_nestedPanes;	}
@@ -214,7 +226,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                             return;
 
                         uint result = Win32Helper.IsRunningOnMono ? 0 : NativeMethods.SendMessage(this.Handle, (int)Win32.Msgs.WM_NCHITTEST, 0, (uint)m.LParam);
-                        if (result == 2 && DockPanel.AllowEndUserDocking && this.AllowEndUserDocking)	// HITTEST_CAPTION
+                        if (result == 2 && DockPanel.AllowEndUserDocking && DockPanel.AllowChangeLayout && this.AllowEndUserDocking)	// HITTEST_CAPTION
                         {
                             Activate();
                             m_dockPanel.BeginDrag(this);

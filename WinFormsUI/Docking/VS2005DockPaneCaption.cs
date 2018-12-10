@@ -373,6 +373,18 @@ namespace WeifenLuo.WinFormsUI.Docking
             rectCaptionText.Y += TextGapTop;
             rectCaptionText.Height -= TextGapTop + TextGapBottom;
 
+
+			if ( DockPane.ActiveContent != null ) {
+				var icon = DockPane.ActiveContent.DockHandler.Icon;
+				if ( icon != null && DockPane.DockPanel.ShowDocumentIcon ) {
+					int offset = ( rectCaption.Height - 16 ) / 2;
+					g.DrawIcon( icon, new Rectangle( offset, offset, 16, 16 ) );
+					rectCaptionText.X += 16 + offset;
+					rectCaptionText.Width -= 16 + offset;
+				}
+			}
+
+
             Color colorText;
             if (DockPane.IsActivated)
                 colorText = DockPane.DockPanel.Theme.Skin.DockPaneStripSkin.ToolWindowGradient.ActiveCaptionGradient.TextColor;
@@ -461,7 +473,10 @@ namespace WeifenLuo.WinFormsUI.Docking
 
         private void AutoHide_Click(object sender, EventArgs e)
         {
-            DockPane.DockState = DockHelper.ToggleAutoHideState(DockPane.DockState);
+			if ( !DockPane.DockPanel.AllowChangeLayout )
+				return;
+
+			DockPane.DockState = DockHelper.ToggleAutoHideState(DockPane.DockState);
             if (DockHelper.IsDockStateAutoHide(DockPane.DockState))
             {
                 DockPane.DockPanel.ActiveAutoHideContent = null;

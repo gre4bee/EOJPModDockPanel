@@ -25,14 +25,22 @@ namespace DockSample {
 		public CustomFloatWindow( DockPanel dockPanel, DockPane pane )
 			: base( dockPanel, pane ) {
 
+<<<<<<< HEAD
 			//FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+=======
+			FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+>>>>>>> d0768eb... ウィンドウロックの実装.
 			DoubleClickTitleBarToDock = false;
 		}
 
 		public CustomFloatWindow( DockPanel dockPanel, DockPane pane, Rectangle bounds )
 			: base( dockPanel, pane, bounds ) {
 
+<<<<<<< HEAD
 			//FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+=======
+			FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+>>>>>>> d0768eb... ウィンドウロックの実装.
 			DoubleClickTitleBarToDock = false;
 		}
 
