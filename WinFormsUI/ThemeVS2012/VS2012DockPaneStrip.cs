@@ -127,7 +127,7 @@ namespace WeifenLuo.WinFormsUI.Docking
         private int m_endDisplayingTab = 0;
         private int m_firstDisplayingTab = 0;
         private bool m_documentTabsOverflow = false;
-		private bool m_CloseButtonVisible = false
+        private bool m_CloseButtonVisible = false;
         private static string m_toolTipSelect;
         private Rectangle _activeClose;
         private int _selectMenuMargin = 5;

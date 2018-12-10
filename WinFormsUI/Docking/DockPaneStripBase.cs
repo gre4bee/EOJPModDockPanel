@@ -26,13 +26,6 @@ namespace WeifenLuo.WinFormsUI.Docking
                 Dispose(false);
             }
 
-            public bool CloseButtonVisible
-            {
-                get { return m_closeButtonVisible; }
-                set { m_closeButtonVisible = value; }
-            }
-            private bool m_closeButtonVisible = false;
-
             public IDockContent Content
             {
                 get { return m_content; }

@@ -28,9 +28,3 @@ T4MVC.cs
 *.nupkg
 /.vs
 /.idea
-
-Tests3/
-
-Tests2/
-
-Tests/

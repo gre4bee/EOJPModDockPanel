@@ -96,21 +96,21 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
         private const int _ToolWindowTabSeperatorGapBottom = 3;
 
         private const int _DocumentStripGapTop = 0;
-        private const int _DocumentStripGapBottom = 0;//1
+        private const int _DocumentStripGapBottom = 1;
         private const int _DocumentTabMaxWidth = 65;
         private const int _DocumentButtonGapTop = 3;
-        private const int _DocumentButtonGapBottom = 3;//3
+        private const int _DocumentButtonGapBottom = 3;
         private const int _DocumentButtonGapBetween = 0;
-        private const int _DocumentButtonGapRight = 0;
+        private const int _DocumentButtonGapRight = 3;
         private const int _DocumentTabGapTop = 0;//3;
         private const int _DocumentTabGapLeft = 0;//3;
         private const int _DocumentTabGapRight = 0;//3;
         private const int _DocumentIconGapBottom = 2;//2;
-        private const int _DocumentIconGapLeft = 2;
+        private const int _DocumentIconGapLeft = 8;
         private const int _DocumentIconGapRight = 0;
         private const int _DocumentIconHeight = 16;
         private const int _DocumentIconWidth = 16;
-        private const int _DocumentTextGapRight = 0;
+        private const int _DocumentTextGapRight = 6;
 
         #endregion
 
@@ -119,8 +119,6 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
         private ContextMenuStrip m_selectMenu;
         private InertButton m_buttonOverflow;
         private InertButton m_buttonWindowList;
-        private static Bitmap m_imageButtonClose;
-        private InertButton m_buttonClose;
         private IContainer m_components;
         private ToolTip m_toolTip;
         private Font m_font;
@@ -128,10 +126,9 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
         private int m_startDisplayingTab = 0;
         private int m_endDisplayingTab = 0;
         private int m_firstDisplayingTab = 0;
-        private static string m_toolTipClose;
         private bool m_documentTabsOverflow = false;
         private static string m_toolTipSelect;
-        private bool m_closeButtonVisible = false;
+		private bool m_closeButtonVisible = false;
         private Rectangle _activeClose;
         private int _selectMenuMargin = 5;
         private bool m_suspendDrag = false;
@@ -186,7 +183,6 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
                     DocumentTabGapRight +
                     DocumentButtonGapRight +
                     ButtonOverflow.Width +
-                    //ButtonClose.Width +
                     ButtonWindowList.Width +
                     2 * DocumentButtonGapBetween;
 
@@ -215,31 +211,14 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
                         DockPane.DockPanel.Theme.ImageService.DockPaneHover_OptionOverflow, 
                         DockPane.DockPanel.Theme.ImageService.DockPane_OptionOverflow,
                         DockPane.DockPanel.Theme.ImageService.DockPanePress_OptionOverflow);
-                    m_buttonOverflow.Click += new EventHandler(Close_Click);
-                    Controls.Add(m_buttonClose);
+                    m_buttonOverflow.Click += new EventHandler(WindowList_Click);
+                    Controls.Add(m_buttonOverflow);
                 }
 
                 return m_buttonOverflow;
             }
         }
 
-        private InertButton ButtonClose
-        {
-            get
-            {
-                if (m_buttonClose == null)
-                {
-                    m_buttonClose = new InertButton(
-                        DockPane.DockPanel.Theme.ImageService.DockPaneHover_Close,
-                        DockPane.DockPanel.Theme.ImageService.DockPane_Close,
-                        DockPane.DockPanel.Theme.ImageService.DockPanePress_Close);
-                    m_buttonClose.Click += new EventHandler(WindowList_Click);
-                    Controls.Add(m_buttonClose);
-                }
-
-                return m_buttonClose;
-            }
-        }
         private InertButton ButtonWindowList
         {
             get
@@ -538,7 +517,6 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
 
             ResumeLayout();
         }
-
 
         protected override void Dispose(bool disposing)
         {
@@ -1137,7 +1115,8 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
             var rect = tab.Rectangle.Value;
             if (tab.TabWidth == 0)
                 return;
-                var rectCloseButton = GetCloseButtonRect(rect);
+
+            var rectCloseButton = GetCloseButtonRect(rect);
             Rectangle rectIcon = new Rectangle(
                 rect.X + DocumentIconGapLeft,
                 rect.Y + rect.Height - DocumentIconGapBottom - DocumentIconHeight,
@@ -1186,27 +1165,21 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
                 {
                     paint = activeColor;
                     text = activeText;
-                    if (m_closeButtonVisible)        //update
-                    {
-                        image = IsMouseDown
-                            ? imageService.TabPressActive_Close
-                            : rectCloseButton == ActiveClose
-                                ? imageService.TabHoverActive_Close
-                                : imageService.TabActive_Close;
-                    }
+                    image = IsMouseDown
+                        ? imageService.TabPressActive_Close
+                        : rectCloseButton == ActiveClose
+                            ? imageService.TabHoverActive_Close
+                            : imageService.TabActive_Close;
                 }
                 else
                 {
                     paint = lostFocusColor;
                     text = lostFocusText;
-                    if (m_closeButtonVisible)        //update
-                    {
-                        image = IsMouseDown
-                            ? imageService.TabPressActive_Close
-                            : rectCloseButton == ActiveClose
-                                ? imageService.TabHoverActive_Close
-                                : imageService.TabActive_Close;
-                    }
+                    image = IsMouseDown
+                        ? imageService.TabPressLostFocus_Close
+                        : rectCloseButton == ActiveClose
+                            ? imageService.TabHoverLostFocus_Close
+                            : imageService.TabLostFocus_Close;
                 }
             }
             else
@@ -1215,14 +1188,11 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
                 {
                     paint = mouseHoverColor;
                     text = mouseHoverText;
-                    if (m_closeButtonVisible)        //update
-                    {
-                        image = IsMouseDown
-                            ? imageService.TabPressActive_Close
-                            : rectCloseButton == ActiveClose
-                                ? imageService.TabHoverActive_Close
-                                : imageService.TabActive_Close;
-                    }
+                    image = IsMouseDown
+                        ? imageService.TabPressInactive_Close
+                        : rectCloseButton == ActiveClose
+                            ? imageService.TabHoverInactive_Close
+                            : imageService.TabInactive_Close;
                 }
                 else
                 {
@@ -1238,11 +1208,6 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
 
             if (rectTab.Contains(rectIcon) && DockPane.DockPanel.ShowDocumentIcon)
                 g.DrawIcon(tab.Content.DockHandler.Icon, rectIcon);
-            // Not show close button space if it not visible
-            if (!m_closeButtonVisible)
-            {
-                rect.Width = rect.Width - rectCloseButton.Width;
-            }
         }
 
         private bool m_isMouseDown = false;
@@ -1342,7 +1307,7 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
 
         private Rectangle GetCloseButtonRect(Rectangle rectTab)
         {
-            if (Appearance != DockPane.AppearanceStyle.Document || (!this.m_closeButtonVisible))
+            if (Appearance != DockPane.AppearanceStyle.Document)
             {
                 return Rectangle.Empty;
             }
@@ -1408,21 +1373,15 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2013
 
                 if (m_buttonWindowList != null)
                     m_buttonWindowList.Left = -m_buttonWindowList.Width;
-                if (m_buttonClose != null)
-                    m_buttonClose.Left = -m_buttonClose.Width;
             }
             else
             {
                 ButtonOverflow.Visible = m_documentTabsOverflow;
                 ButtonOverflow.RefreshChanges();
-                m_closeButtonVisible = false;
-               // ButtonClose.Visible = m_closeButtonVisible;
-              //  ButtonClose.RefreshChanges();
+
                 ButtonWindowList.Visible = !m_documentTabsOverflow;
                 ButtonWindowList.RefreshChanges();
             }
-
-            
         }
 
         protected override void OnLayout(LayoutEventArgs levent)

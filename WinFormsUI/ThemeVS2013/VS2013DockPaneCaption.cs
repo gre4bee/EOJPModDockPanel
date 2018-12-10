@@ -43,7 +43,7 @@ namespace WeifenLuo.WinFormsUI.Docking
                 return m_buttonClose;
             }
         }
-        
+
         private InertButtonBase m_buttonAutoHide;
         private InertButtonBase ButtonAutoHide
         {

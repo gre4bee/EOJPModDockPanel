@@ -19,7 +19,7 @@ namespace WeifenLuo.WinFormsUI.ThemeVS2015
             {
                 UseGlassOnMenuStrip = false,
             };
-            Measures.SplitterSize = 2;//6
+            Measures.SplitterSize = 6;
             Measures.AutoHideSplitterSize = 3;
             Measures.DockPadding = 6;
             ShowAutoHideContentOnHover = false;
